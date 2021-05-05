@@ -30,6 +30,19 @@ std::string_view fragmentShaderSource { "#version 330 core\n"
     "}\0"
 };
 
+template<typename V, typename F> inline constexpr V lerp(V x, V y, F t) {
+    return x * ((F)1 - t) + y * t;
+}
+inline constexpr float triangle_wave(float x, float a = 1.0f, float p = 1.0f){
+    return glm::abs(a*M_2_PI*glm::asin(glm::sin((2*M_PI*x)/p)));
+}
+
+Array<glm::vec3> rand_vecs(size_t n){
+    Array<glm::vec3> ret(n);
+    for (auto& v : ret) v = {(float)rand() / RAND_MAX, (float)rand() / RAND_MAX, (float)rand() / RAND_MAX};
+    return ret;
+}
+
 int main(){
     using namespace GameEngine;
 
@@ -61,18 +74,11 @@ int main(){
                 {-1,  1, -1}
             };
 
-    Array<M::VecF<3>> colors = {
-                {1, 0, 0},
-                {0, 1, 0},
-                {0, 0, 1},
-                {1, 0, 1},
+    Array<M::VecF<3>> colorsBase = rand_vecs(8);
+    Array<M::VecF<3>> colorsDest = rand_vecs(8);    
 
-                {1, 0, 0},
-                {0, 1, 0},
-                {0, 0, 1},
-                {0, 0, 0}
-            };
-
+    Array<M::VecF<3>> colors(colorsBase.size());
+    
     Array<int> indices = {
         // front
         0, 1, 2,
@@ -112,12 +118,10 @@ int main(){
     shader->Use();
     shader->SetMat4("view_projection", view_projection);
 
-    float speed = M_PI;
+    float speed = glm::radians(90.0f);
     
     while (app.Update()){
         
-        Log::debug("FrameRate = {:.2f}, DeltaTime = {:.3}", Time::FrameRate(), Time::DeltaTime());
-
         if (Input::IsKeyHeld(Events::ARROW_RIGHT) || Input::IsKeyHeld(Events::ARROW_LEFT)) {
             float angle = (Input::IsKeyHeld(Events::ARROW_RIGHT) ? speed : -speed) * Time::DeltaTime();
             model = glm::rotate(model, angle, {0, 1, 0});
@@ -128,8 +132,15 @@ int main(){
             model = glm::rotate(model, angle, {1, 0, 0});
         }
 
-        //view_projection = glm::perspective(45.0f, (float)win.GetConfig().Width / win.GetConfig().Height, 1.0f, 150.0f);
-        //shader->SetMat4("view_projection", view_projection);
+        auto wave = triangle_wave(Time::RunningTime(), 1, 4);//(float)glm::abs(glm::sin(glm::radians(10*Time::RunningTime())));
+        if (wave > 0.99) colorsBase = rand_vecs(8); else
+        if (wave < 0.01) colorsDest = rand_vecs(8);
+
+        for (int i=0; i<colors.size(); ++i) colors[i] = lerp(colorsBase[i], colorsDest[i], wave);
+        bspec->GetBuffers()[1]->SetSubData<Float3>(colors.data(), 0, colors.size());
+        
+        view_projection = glm::perspective(glm::radians(60.f), (float)win.GetConfig().Width / win.GetConfig().Height, 1.0f, 150.0f);
+        shader->SetMat4("view_projection", view_projection);
 
         shader->SetMat4("model", model);
         win.GetRenderer()->Clear();
@@ -138,6 +149,7 @@ int main(){
 
         if (Input::IsKeyPressed(Events::F11)) win.ToggleFullscreen();        
         if (Input::IsKeyPressed(Events::ESC)) win.Close();
+        Log::debug("FrameRate = {:.2f}, DeltaTime = {:.3}", Time::FrameRate(), Time::DeltaTime());
     }
 
     return 0;

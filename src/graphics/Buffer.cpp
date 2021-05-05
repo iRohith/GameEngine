@@ -88,3 +88,32 @@ Ref<Buffer> Buffer::Create(BufferType bt, DataType dt, void* values, size_t size
 }
 
 #undef RUNTBUFGEN
+
+template<DataType DT>
+std::unique_ptr<BufferMap<DT>> create_map(const Buffer& b){
+#ifdef RENDERER_OPENGL  
+    if (App::get()->GetAppConfig().gcConfig.apiType == GraphicsApiType::OPENGL) { 
+        return std::unique_ptr<BufferMap<DT>>(new GLBufferMap<DT>(b));
+    }
+#endif
+    return nullptr;
+}
+
+#define GEN_TEMPLATE_IMPL(DT) \
+template<> std::unique_ptr<BufferMap<DT>> BufferMap<DT>::Create(const Buffer& b){ \
+    return create_map<DT>(b); \
+}
+
+GEN_TEMPLATE_IMPL(Float)
+GEN_TEMPLATE_IMPL(Float2)
+GEN_TEMPLATE_IMPL(Float3)
+GEN_TEMPLATE_IMPL(Float4)
+GEN_TEMPLATE_IMPL(Mat3)
+GEN_TEMPLATE_IMPL(Mat4)
+GEN_TEMPLATE_IMPL(Int)
+GEN_TEMPLATE_IMPL(Int2)
+GEN_TEMPLATE_IMPL(Int3)
+GEN_TEMPLATE_IMPL(Int4)
+GEN_TEMPLATE_IMPL(Bool)
+
+#undef GEN_TEMPLATE_IMPL

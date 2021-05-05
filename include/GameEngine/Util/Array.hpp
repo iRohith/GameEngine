@@ -28,9 +28,10 @@ public:
 		}
 	}
 
-    ic Array(size_t _size) {
+    template<typename I, std::enable_if_t<std::is_integral<I>::value, bool> = true>
+    ic Array(I _size) {
         if (_size <= 0) return;
-		_arr = std::make_shared<array_data>(_size);
+		_arr = std::make_shared<array_data>((size_t)_size);
     }
 
     ic Array(size_t _size, T defVal) {
@@ -45,7 +46,7 @@ public:
 		std::move(l.begin(), l.end(), _arr->start);
 	}
 
-    template<typename C> ic Array(const C& c) {
+    template<typename C, std::enable_if_t<!std::is_integral<C>::value, bool> = true> ic Array(const C& c) {
         _arr = std::make_shared<array_data>(c.size());
 		std::copy(c.begin(), c.end(), _arr->start);
     }
@@ -91,6 +92,13 @@ public:
 
     template<typename F> ic void foreach(const F& f){
         for (T* i = begin(); i != end(); i++) f(*i);
+    }
+
+    template<typename F> constexpr Array<UnaryFunRetType<T,F>> map(const F& f){
+        const size_t s = size();
+        Array<UnaryFunRetType<T,F>> m(s);
+        for (int i=0; i<s; i++) m[i] = f( _arr->start[i]);
+        return m;
     }
 
 private:
@@ -144,6 +152,13 @@ public:
 
     template<typename F> ic void foreach(const F& f){
         for (T* i = begin(); i != end(); i++) f(*i);
+    }
+
+    template<typename F> constexpr Array<UnaryFunRetType<T,F>> map(const F& f){
+        const size_t s = size();
+        Array<UnaryFunRetType<T,F>> m(s);
+        for (int i=0; i<s; i++) m[i] = f( _arr->start[i]);
+        return m;
     }
 
 private:
@@ -204,6 +219,13 @@ public:
 
     template<typename F> ic void foreach(const F& f){
         for (T* i = begin(); i != end(); i++) f(*i);
+    }
+
+    template<typename F> constexpr Array<UnaryFunRetType<T,F>> map(const F& f){
+        const size_t s = size();
+        Array<UnaryFunRetType<T,F>> m(s);
+        for (int i=0; i<s; i++) m[i] = f( _arr->start[i]);
+        return m;
     }
 
 private:

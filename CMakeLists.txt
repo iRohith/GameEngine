@@ -93,6 +93,7 @@ set(SRC
     "src/graphics/BufferSpec.cpp"
     "src/graphics/Renderer.cpp"
     "src/graphics/Shader.cpp"
+    "src/graphics/Texture.cpp"
 )
 
 if (ENGINE_STATIC_BUILD)
@@ -118,6 +119,7 @@ endif()
 target_include_directories(GameEngine PUBLIC 
     "include"
     "ThirdParty/glm"
+    "ThirdParty/stb"
 )
 
 if (NOT NO_EXTERNAL_LOGGER AND (NOT DISABLE_USER_LOGGING OR NOT DISABLE_ENGINE_LOGGING))

@@ -113,7 +113,6 @@ void MyWindow::UpdateConfig(const WindowConfig& config){
         
         XSendEvent (xdisplay, h->xwindow, False, h->swa.event_mask, &xev);
         XFlush(xdisplay);
-        GE_LOGD("Fullscreen toggle");
     }
     cfg = config;
 }

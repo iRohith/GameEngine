@@ -11,7 +11,7 @@ namespace GameEngine {
 
 bool read_file(const char* path, std::string& out){
     try {
-        std::ifstream t("file.txt", std::ios::in | std::ios::binary);
+        std::ifstream t(path, std::ios::in | std::ios::binary);
         t.exceptions (std::ifstream::failbit | std::ifstream::badbit);
         t.seekg(0, std::ios::end);
         size_t size = t.tellg();
@@ -21,7 +21,7 @@ bool read_file(const char* path, std::string& out){
         t.read(&out[0], size);
         return true;
     } catch (std::exception e) {
-        GE_LOGE("Vertex shader compile failed: {}, msg: {}", path, e.what());
+        GE_LOGE("File read failed: path={}, msg: {}", path, e.what());
         return false;
     }
 }
@@ -68,7 +68,7 @@ public:
 
     GLShader(const char* _name, const char* vertFilePath, const char* fragFilePath, bool addToLibrary){
         name = _name;
-
+        
         std::string code;
         if (!read_file(vertFilePath, code)){ status = -1; return; }
 
@@ -81,6 +81,7 @@ public:
         if (fragment == UINT32_MAX){ status = -1; return; }
 
         id = glCreateProgram();
+
         glAttachShader(id, vertex);
         glAttachShader(id, fragment);
         glLinkProgram(id);

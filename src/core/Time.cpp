@@ -20,7 +20,7 @@ namespace GameEngine {
     }
 
     uint64_t initTime = 0, prevUpdateTime = 0;
-    double elapsedTime, deltaTime, frameDelay;
+    float elapsedTime, deltaTime, frameDelay;
 
     void _Time_Init()
     {
@@ -59,7 +59,7 @@ namespace GameEngine {
     }
 
 
-    void GameEngine::Time::Sleep(double millis) {
+    void GameEngine::Time::Sleep(float millis) {
     #ifdef PLATFORM_WINDOWS
         ::Sleep((uint32_t)millis);
     #else
@@ -77,17 +77,17 @@ namespace GameEngine {
         } while (std::chrono::high_resolution_clock::now() < end);
     }
 
-    double Time::RunningTime()
+    float Time::RunningTime()
     {
         return elapsedTime;
     }
 
-    double Time::DeltaTime()
+    float Time::DeltaTime()
     {
         return deltaTime;
     }
 
-    double Time::FrameRate()
+    float Time::FrameRate()
     {
         return 1 / DeltaTime();
     }

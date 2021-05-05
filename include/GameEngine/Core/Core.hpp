@@ -58,3 +58,9 @@
 #endif
 
 #define GE_IN_CXP inline constexpr
+
+#include <memory>
+
+namespace GameEngine {
+	template<typename T> using Ref = std::shared_ptr<T>;
+}

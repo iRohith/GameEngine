@@ -10,6 +10,8 @@ namespace GameEngine {
         uint32_t Width = 620;
         uint32_t Height = 480;
         bool Fullscreen = false;
+        inline constexpr const M::VecI<2> size() const { return {Width, Height}; }
+        inline constexpr const float aspect() const { return (float)Width/Height; }
     };
 
     class GEAPI Window {

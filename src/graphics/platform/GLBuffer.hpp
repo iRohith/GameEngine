@@ -20,13 +20,13 @@ namespace GameEngine {
             glBufferData(BUFFER_CONST, size * DataTypeSize(DT), _data, _data ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
         }
 
-        void SetData(void* _data, size_t _size){ 
+        void SetData(const void* _data, size_t _size){ 
             glBindBuffer(BUFFER_CONST, id);  
             size = _size;
             glBufferData(BUFFER_CONST, _size * DataTypeSize(DT), _data, _data ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
         }
 
-        void SetSubData(void* _data, size_t _offset, size_t _count) {
+        void SetSubData(const void* _data, size_t _offset, size_t _count) {
             glBindBuffer(BUFFER_CONST, id);
             glBufferSubData(BUFFER_CONST, _offset * DataTypeSize(DT), _count * DataTypeSize(DT), _data);
         }
@@ -39,6 +39,24 @@ namespace GameEngine {
 
         const BufferType GetBufferType() const { return BT; };
         const DataType GetDataype() const { return DT; };
+    };
+
+    template<DataType DT = Float> struct GLBufferMap : public BufferMap<DT> {
+        using T = typename BufferMap<DT>::T;
+        GLenum BUFFER_CONST;
+        uint32_t id;
+
+        GLBufferMap(const Buffer& b){
+            BUFFER_CONST = b.GetBufferType() == INDEXBUFFER ? GL_ELEMENT_ARRAY_BUFFER : GL_ARRAY_BUFFER;
+            id = b.GetID();
+            glBindBuffer(BUFFER_CONST, id);
+            BufferMap<DT>::data = ArrayView<T>((T*)glMapBuffer(BUFFER_CONST,  GL_READ_WRITE), b.GetSize());
+        }
+
+        ~GLBufferMap(){
+            glBindBuffer(BUFFER_CONST, id); 
+            glUnmapBuffer(BUFFER_CONST);
+        }
     };
     
 }

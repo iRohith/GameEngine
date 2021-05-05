@@ -67,6 +67,11 @@ void EventHandler::Update()
                 OnMouseButtonEvent(win, mb, ev.type == ButtonPress ? Events::PRESSED : Events::RELEASED);
                 break;
             }
+            case LeaveNotify:
+            {
+                OnMouseMoveEvent(win, -1, -1);
+                break;
+            }
             case MotionNotify:
             {
                 OnMouseMoveEvent(win, ev.xbutton.x, ev.xbutton.y);

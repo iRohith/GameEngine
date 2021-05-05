@@ -82,8 +82,6 @@ namespace GameEngine {
     template<> struct NativeToDataType<M::VecI<4>>  { const DataType value = Int4; };
     template<> struct NativeToDataType<bool>  { const DataType value = Bool; };
 
-	template<typename T> using Ref = std::shared_ptr<T>;
-
     struct BufferElement
 	{
 		const char* Name;
@@ -144,28 +142,28 @@ namespace GameEngine {
         static Ref<Buffer> Create(typename DataTypeToNative<DT>::type* values, size_t size, const BufferLayout&);
 
         template<BufferType BT = VERTEXBUFFER, DataType DT = Float>
-        static inline constexpr Ref<Buffer> Create(const ArrayView<typename DataTypeToNative<DT>::type>& arr, const BufferLayout& bl){
+        static inline constexpr Ref<Buffer> Create(const ArrayConstView<typename DataTypeToNative<DT>::type>& arr, const BufferLayout& bl){
             return Create(arr.data(), arr.size(), bl);
         }
 
 		virtual ~Buffer() = default;
         virtual const BufferType GetBufferType() const { return UNKNOWN_BT; }
         virtual const DataType GetDataype() const { return UNKNOWN_DT; }
-
-        virtual void SetData(void* _data, size_t _size) = 0;
-		virtual void SetSubData(void* _data, size_t offset, size_t _size) = 0;
+		
+        virtual void SetData(const void* _data, size_t _size) = 0;
+		virtual void SetSubData(const void* _data, size_t offset, size_t _size) = 0;
         virtual void* GetData() const = 0;
         inline constexpr size_t GetSize() const { return size; }
         inline constexpr uint32_t GetID() const { return id; }
 		inline constexpr const BufferLayout& GetLayout() const { return layout; }
 
         template<DataType DT = Float>
-        inline constexpr void SetData(const ArrayView<typename DataTypeToNative<DT>::type>& _data) 
+        inline constexpr void SetData(const ArrayConstView<typename DataTypeToNative<DT>::type>& _data) 
             { SetData(_data.data(), _data.size()); }
 
 		template<DataType DT = Float>
         inline constexpr void SetSubData(typename DataTypeToNative<DT>::type* _data, size_t offsetInBuffer, size_t count) 
-            { SetSubData(_data, offsetInBuffer, count); }
+            { SetSubData((const void*)_data, offsetInBuffer, count); }
         
         template<DataType DT = Float>
         inline constexpr auto GetData() const
@@ -175,4 +173,21 @@ namespace GameEngine {
         uint32_t id, size;
 		BufferLayout layout;
     };
+
+	template<DataType DT = Float> class GEAPI BufferMap {
+	public:
+		using T = typename DataTypeToNative<DT>::type;
+		static std::unique_ptr<BufferMap> Create(const Buffer&);
+		virtual ~BufferMap() = default;
+		inline void SetSubData(const ArrayConstView<T>& d, size_t offset){
+			std::copy(d.begin(), d.end(), data.begin() + offset);
+		}
+
+		inline auto get() { return data; }
+		inline operator ArrayView<T>&(){ return data; }
+		inline T& operator[](const size_t& idx) { return data[idx]; }
+		inline T& operator[](const size_t& idx) const { return data[idx]; }
+	protected:
+		ArrayView<T> data;
+	};
 }

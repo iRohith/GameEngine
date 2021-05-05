@@ -17,9 +17,13 @@ add_executable(RawCube RawCube.cpp)
 add_dependencies(RawCube GameEngine)
 target_link_libraries(RawCube PUBLIC GameEngine)
 
-add_executable(RawTexturedCube RawTexturedCube.cpp)
-add_dependencies(RawTexturedCube GameEngine)
-target_link_libraries(RawTexturedCube PUBLIC GameEngine)
+add_executable(RawTexture RawTexture.cpp)
+add_dependencies(RawTexture GameEngine)
+target_link_libraries(RawTexture PUBLIC GameEngine)
+
+add_executable(FlappyBird FlappyBird/main.cpp)
+add_dependencies(FlappyBird GameEngine)
+target_link_libraries(FlappyBird PUBLIC GameEngine)
 
 add_executable(GLTest GLTest.cpp)
 add_dependencies(GLTest glad)

@@ -7,6 +7,8 @@
 #include "../ThirdParty/fmt/chrono.h"
 #include "../ThirdParty/fmt/color.h"
 #pragma warning( pop )
+#include <filesystem>
+#include <string_view>
 
 #define ToLambda(fun, ...) [&](){ fun(__VA_ARGS__); }
 
@@ -110,3 +112,12 @@ template<typename T1, typename T2> struct select_if<T1, T2, true> { using type =
 template<typename T1, typename T2> struct select_if<T1, T2, false> { using type = T2; };
 
 template<typename T, typename F> using UnaryFunRetType = decltype((std::declval<F>())(std::declval<T>()));
+
+namespace GameEngine {
+	inline std::string asset_file(const std::string_view& str) {
+		auto pth = std::filesystem::current_path();
+		pth += "/assets/";
+		pth += str;
+		return pth;
+	}
+}

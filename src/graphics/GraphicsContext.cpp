@@ -22,7 +22,7 @@ namespace GameEngine {
             auto h = GetX11HNDL(ptr);
             h->rootWindow = RootWindow(xdisplay, glgc.vInfo->screen);
             h->swa.border_pixel = 0;
-            h->swa.event_mask = ExposureMask|ButtonPressMask|ButtonReleaseMask|KeyPressMask|KeyReleaseMask|PointerMotionMask|StructureNotifyMask|FocusChangeMask;
+            h->swa.event_mask = ExposureMask|ButtonPressMask|ButtonReleaseMask|KeyPressMask|KeyReleaseMask|LeaveWindowMask|PointerMotionMask|StructureNotifyMask|FocusChangeMask;
             h->swa.colormap = XCreateColormap(xdisplay, h->rootWindow,
                                             glgc.vInfo->visual, AllocNone );
 
@@ -66,6 +66,8 @@ namespace GameEngine {
             }
 
             glEnable(GL_DEPTH_TEST); 
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glEnable(GL_BLEND);
             glClearColor( 0.0, 0.0, 0.0, 1.0 );
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glFlush();
