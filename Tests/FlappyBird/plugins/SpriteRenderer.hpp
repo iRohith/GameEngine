@@ -5,7 +5,7 @@
 #include <GameEngine/Graphics/BufferSpec.hpp>
 #include <vector>
 
-#define MAX_SPRITES 20
+#define MAX_SPRITES 8
 
 namespace GameEngine {
     class SpriteRenderer {

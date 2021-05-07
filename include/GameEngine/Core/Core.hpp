@@ -56,7 +56,7 @@
         #define GE_DEBUGBREAK() raise(SIGTRAP)
     #endif
 #else
-	#define GE_DEBUGBREAK
+	#define GE_DEBUGBREAK()
 #endif
 
 #include <memory>

@@ -136,7 +136,7 @@ namespace GameEngine {
     struct GLGraphicsContext : public GraphicsContext {
         static constexpr const int attributes[] = {
             WGL_CONTEXT_MAJOR_VERSION_ARB, 3,   // Set the MAJOR version of OpenGL to 3
-            WGL_CONTEXT_MINOR_VERSION_ARB, 3,   // Set the MINOR version of OpenGL to 2
+            WGL_CONTEXT_MINOR_VERSION_ARB, 0,   // Set the MINOR version of OpenGL to 2
             WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB, // Set our OpenGL context to be forward compatible
             0
         };

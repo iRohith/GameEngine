@@ -28,7 +28,7 @@ int main(){
     using namespace GameEngine;
 
     // Change next line if needed
-    SetAssetFolder(std::filesystem::current_path().parent_path().append("assets").string());
+    //SetAssetFolder(std::filesystem::current_path().parent_path().append("assets").string());
 
     AppConfig cfg;
     cfg.Name = cfg.defaultWindowConfig.Title = "Flappy Bird";
