@@ -8,19 +8,24 @@
 #include "GameEngine/Core/Log.hpp"
 #include "EventHandler.hpp"
 #include <map>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
 
-using XWindow = Window;
+#ifdef PLATFORM_LINUX
+    #include <X11/Xlib.h>
+    #include <X11/Xutil.h>
+    using XWindow = Window;
+#endif
 
 namespace GameEngine {
 
 int userLogLevelFlags = LogLevel::Trace | LogLevel::Debug | LogLevel::Info | LogLevel::Warn | LogLevel::Error | LogLevel::Fatal;
 
-Display* xdisplay;
-Atom wmDeleteWindow;
+#ifdef PLATFORM_LINUX
+    Display* xdisplay;
+    Atom wmDeleteWindow;
+    std::map<XWindow, GameEngine::Window*> windowsMap;
+#endif
+
 std::vector<GameEngine::Window*> windows;
-std::map<XWindow, GameEngine::Window*> windowsMap;
 std::vector<Runnable *> runOnUiThread;
 
 #ifndef NO_EXTERNAL_LOGGER
@@ -32,6 +37,7 @@ std::shared_ptr<spdlog::logger> ge_logger_core = any(spdlog::stdout_color_mt("Ga
 #endif
 #endif
 
+std::filesystem::path asset_folder_path = std::filesystem::current_path().append("assets");
 std::unique_ptr<App> appInstance;
 
 std::unique_ptr<EventHandler> evh = std::make_unique<EventHandler>();

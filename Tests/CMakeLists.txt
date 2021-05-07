@@ -25,18 +25,4 @@ add_executable(FlappyBird FlappyBird/main.cpp)
 add_dependencies(FlappyBird GameEngine)
 target_link_libraries(FlappyBird PUBLIC GameEngine)
 
-add_executable(GLTest GLTest.cpp)
-add_dependencies(GLTest glad)
-include_directories(
-        ThirdParty/glad/include
-    )
-target_link_libraries(GLTest PUBLIC X11 glad ${CMAKE_DL_LIBS})
-
-add_executable(GLTriangle GLTriangle.cpp)
-add_dependencies(GLTriangle glad)
-include_directories(
-        ThirdParty/glad/include
-    )
-target_link_libraries(GLTriangle PUBLIC X11 glad ${CMAKE_DL_LIBS})
-
 file(COPY assets DESTINATION ${CMAKE_BINARY_DIR}/bin)

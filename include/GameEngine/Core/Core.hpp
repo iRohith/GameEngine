@@ -55,9 +55,9 @@
         #include <signal.h>
         #define GE_DEBUGBREAK() raise(SIGTRAP)
     #endif
+#else
+	#define GE_DEBUGBREAK
 #endif
-
-#define GE_IN_CXP inline constexpr
 
 #include <memory>
 

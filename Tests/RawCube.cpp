@@ -1,9 +1,12 @@
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include "GameEngine/Core/App.hpp"
 #include "GameEngine/Core/Log.hpp"
 #include "GameEngine/Core/Time.hpp"
 #include "GameEngine/Core/Input.hpp"
 #include "GameEngine/Graphics/BufferSpec.hpp"
 #include "GameEngine/Graphics/Shader.hpp"
+#include <math.h>
 #include <glad/gl.h>
 
 std::string_view vertexShaderSource { "#version 330 core\n"

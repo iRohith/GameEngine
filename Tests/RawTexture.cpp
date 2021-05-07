@@ -1,3 +1,5 @@
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include "GameEngine/Core/App.hpp"
 #include "GameEngine/Core/Log.hpp"
 #include "GameEngine/Core/Time.hpp"
@@ -45,6 +47,8 @@ std::string_view fragmentShaderSource {
 int main(){
     using namespace GameEngine;
 
+    // Change next line if needed
+    SetAssetFolder(std::filesystem::current_path().parent_path().append("assets").string());
 
     AppConfig cfg;
     cfg.Name = cfg.defaultWindowConfig.Title = "RawTexturedCube";

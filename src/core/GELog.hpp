@@ -31,8 +31,8 @@
     #define GE_LOGD(...) _log_fmt_impl(::GameEngine::LogLevel::Debug, __VA_ARGS__)
     #define GE_LOGI(...) _log_fmt_impl(::GameEngine::LogLevel::Info , __VA_ARGS__)
     #define GE_LOGW(...) _log_fmt_impl(::GameEngine::LogLevel::Warn , __VA_ARGS__)
-    #define GE_LOGE(...) _log_fmt_impl(::GameEngine::LogLevel::Error, __VA_ARGS__)
-    #define GE_LOGF(...) _log_fmt_impl(::GameEngine::LogLevel::Fatal, __VA_ARGS__)
+    #define GE_LOGE(...) _log_fmt_impl(::GameEngine::LogLevel::Error, __VA_ARGS__); GE_DEBUGBREAK()
+    #define GE_LOGF(...) _log_fmt_impl(::GameEngine::LogLevel::Fatal, __VA_ARGS__); GE_DEBUGBREAK()
 
     #define GE_ASSERT(condition, ...) if (!(condition)) { _log_fmt_impl(::GameEngine::LogLevel::Error, "Assertion failed: {}", fmt::format(__VA_ARGS__)); GE_DEBUGBREAK(); }
     #define GE_ASSERT_FATAL(condition, ...) if (!(condition)) { _log_fmt_impl(::GameEngine::LogLevel::Fatal, "Critical assertion failed: {}", fmt::format(__VA_ARGS__)); GE_DEBUGBREAK(); abort(); }

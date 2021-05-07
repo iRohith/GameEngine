@@ -24,7 +24,7 @@ bool read_file(const char* path, std::string& out){
         GE_LOGE("File read failed: path={}, msg: {}", path, e.what());
         return false;
     }
-}
+}     
 
 unsigned int compile_vert(const char* vShaderCode){
     unsigned int vertex;

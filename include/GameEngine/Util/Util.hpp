@@ -79,10 +79,10 @@ namespace GameEngine {
 	};
 }
 
-template<class T> GameEngine::Any<T> any(T& t) { return t; }
-template<class T> GameEngine::Any<T> any(T&& t) { return t; }
-template<class T> GameEngine::Any<T*> any(T*& t) { return t; }
-template<class T> GameEngine::Any<T*> any(T*&& t) { return t; }
+template<class T> GameEngine::Any<T> constexpr any(T& t) { return t; }
+template<class T> GameEngine::Any<T> constexpr any(T&& t) { return t; }
+template<class T> GameEngine::Any<T*> constexpr any(T*& t) { return t; }
+template<class T> GameEngine::Any<T*> constexpr any(T*&& t) { return t; }
 
 #define _apply_(name, code) apply([](auto& name){ code; })
 
@@ -114,10 +114,19 @@ template<typename T1, typename T2> struct select_if<T1, T2, false> { using type 
 template<typename T, typename F> using UnaryFunRetType = decltype((std::declval<F>())(std::declval<T>()));
 
 namespace GameEngine {
+	extern std::filesystem::path asset_folder_path;
+
 	inline std::string asset_file(const std::string_view& str) {
-		auto pth = std::filesystem::current_path();
-		pth += "/assets/";
-		pth += str;
-		return pth;
+		std::string s(str);
+		#ifdef PLATFORM_LINUX
+		std::replace(s.begin(), s.end(), '\\', '/');
+		#elif defined(PLATFORM_WINDOWS)
+		std::replace(s.begin(), s.end(), '/', '\\');
+		#endif
+		return std::filesystem::path(asset_folder_path).append(s).string();
+	}
+
+	inline void SetAssetFolder(const std::string_view& str) {
+		asset_folder_path = std::filesystem::path(str);
 	}
 }

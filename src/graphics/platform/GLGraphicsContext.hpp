@@ -1,12 +1,12 @@
 #ifdef RENDERER_OPENGL
 
+#ifdef PLATFORM_LINUX
+
 /*
 * Check vsync... currently double buffered has less FPS due to syncronozation on first GL call
 *                   after glXSwapBuffers
 * vsync not effecting single buffered
 */
-
-#ifdef PLATFORM_LINUX
 
 #include "../../core/platform/X11HNDL.hpp"
 #include <X11/XKBlib.h>
@@ -122,6 +122,137 @@ namespace GameEngine {
             if (w == nullptr) w = App::get()->GetDefaultWindow();
             auto h = GetX11HNDL((void*)(*(intptr_t*)(w)));
             glXSwapBuffers (xdisplay, h->glxWin);
+        }
+    };
+}
+
+#elif defined(PLATFORM_WINDOWS)
+
+#include "../../core/platform/Win32HNDL.hpp"
+#include <glad/wgl.h>
+#include <glad/gl.h>
+
+namespace GameEngine {
+    struct GLGraphicsContext : public GraphicsContext {
+        static constexpr const int attributes[] = {
+            WGL_CONTEXT_MAJOR_VERSION_ARB, 3,   // Set the MAJOR version of OpenGL to 3
+            WGL_CONTEXT_MINOR_VERSION_ARB, 3,   // Set the MINOR version of OpenGL to 2
+            WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB, // Set our OpenGL context to be forward compatible
+            0
+        };
+
+        static constexpr const PIXELFORMATDESCRIPTOR singleBufferPfd = any(PIXELFORMATDESCRIPTOR())._apply_(it, 
+            it.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+            it.dwFlags = PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW;
+            it.iPixelType = PFD_TYPE_RGBA;
+            it.cColorBits = 32;
+            it.cDepthBits = 24;
+            it.iLayerType = PFD_MAIN_PLANE;
+        )();
+        
+        static constexpr const PIXELFORMATDESCRIPTOR doubleBufferPfd = any(PIXELFORMATDESCRIPTOR())._apply_(it, 
+            it.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+            it.dwFlags = PFD_DOUBLEBUFFER | PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW;
+            it.iPixelType = PFD_TYPE_RGBA;
+            it.cColorBits = 32;
+            it.cDepthBits = 24;
+            it.iLayerType = PFD_MAIN_PLANE;
+        )();
+
+        HDC hdc;
+        HGLRC temp_context;
+        
+        static GLGraphicsContext* Create(const GraphicsConfig& cfg){
+            HDC hdc = GetDC(NULL);
+            //HDC hdc = CreateCompatibleDC(shdc);
+            if (hdc == NULL) {
+                GE_LOGF("Failed to get device context");
+                return nullptr;
+            }
+
+            int format = 0;
+            
+            auto pfd = &doubleBufferPfd;
+            if (!cfg.doubleBuffered || (format = ChoosePixelFormat(hdc, &doubleBufferPfd)) == 0){
+                format = ChoosePixelFormat(hdc, &singleBufferPfd);
+                pfd = &singleBufferPfd;
+            }
+
+            if (format == 0 || SetPixelFormat(hdc, format, pfd) == FALSE) {
+                ReleaseDC(NULL, hdc);
+                GE_LOGE("Failed to set a compatible pixel format!");
+                return nullptr;
+            }
+            // Create and enable a temporary (helper) opengl context:
+            HGLRC temp_context;
+            if (NULL == (temp_context = wglCreateContext(hdc))) {
+                ReleaseDC(NULL, hdc);
+                GE_LOGE("Failed to create the rendering context!");
+                return nullptr;
+            }
+            wglMakeCurrent(hdc, temp_context);
+
+            // Load WGL Extensions:
+            if (!gladLoaderLoadWGL(hdc)) {
+                wglMakeCurrent(NULL, NULL);
+                wglDeleteContext(temp_context);
+                ReleaseDC(NULL, hdc);
+                GE_LOGE("Glad WGL Loader failed!");
+                return nullptr;
+            }
+
+            if (!gladLoaderLoadGL()) {
+                wglMakeCurrent(NULL, NULL);
+                wglDeleteContext(temp_context);
+                ReleaseDC(NULL, hdc);
+                GE_LOGE("Glad Loader failed!");
+                return nullptr;
+            }
+
+            auto gc = new GLGraphicsContext();
+            gc->cfg.doubleBuffered = pfd == &doubleBufferPfd;
+            gc->hdc = hdc;
+            return gc;
+        }
+
+        void CreateWin32GC(const HDC& hdc){
+            HGLRC opengl_context = NULL;
+
+            auto pfd = &doubleBufferPfd;
+            int format = 0;
+            if (!cfg.doubleBuffered || (format = ChoosePixelFormat(hdc, &doubleBufferPfd)) == 0){
+                format = ChoosePixelFormat(hdc, &singleBufferPfd);
+                pfd = &singleBufferPfd;
+            }
+
+            if (format == 0 || SetPixelFormat(hdc, format, pfd) == FALSE) {
+                ReleaseDC(NULL, hdc);
+                GE_LOGE("Failed to set a compatible pixel format!");
+            }
+            
+            if (NULL == (opengl_context = wglCreateContextAttribsARB(hdc, NULL, attributes))) {
+                wglDeleteContext(temp_context);
+                ReleaseDC(NULL, hdc);
+                GE_LOGE("Failed to create the final rendering context!");
+            }
+
+            hndl = opengl_context;
+            wglMakeCurrent(hdc, opengl_context);    // Make our OpenGL 3.3 context current
+        }
+
+        ~GLGraphicsContext(){
+            glFinish();
+            wglMakeCurrent(NULL, NULL);
+            wglDeleteContext(temp_context);
+            wglDeleteContext((HGLRC)hndl);
+            ReleaseDC(NULL, hdc);
+        }
+
+        void SwapBuffers(GameEngine::Window* w) {
+            if (!cfg.doubleBuffered) { glFlush(); return;}
+            if (w == nullptr) w = App::get()->GetDefaultWindow();
+            auto h = GetWin32HNDL(w->GetNativeHandle());
+            ::SwapBuffers(h->hdc);
         }
     };
 }

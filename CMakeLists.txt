@@ -3,7 +3,7 @@ project(GameEngine CXX)
 
 ################## Config ######################
 
-set(ENGINE_STATIC_BUILD OFF)
+set(ENGINE_STATIC_BUILD ON)
 set(COMPILE_TESTS ON)
 
 set(DISABLE_USER_LOGGING OFF)
@@ -107,13 +107,19 @@ endif()
 target_link_libraries(GameEngine PRIVATE STB)
 
 if (PLATFORM_WINDOWS)
-target_link_libraries(GameEngine PRIVATE winmm)
+target_link_libraries(GameEngine PRIVATE winmm gdi32)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        target_compile_definitions(GameEngine PUBLIC /wd4267 /wd4305)
+    endif()
 else()
 target_link_libraries(GameEngine PRIVATE X11)
 endif()
 
 if (RENDERER_OPENGL)
-target_link_libraries(GameEngine PRIVATE glad ${CMAKE_DL_LIBS})
+    target_link_libraries(GameEngine PRIVATE glad ${CMAKE_DL_LIBS})
+    if (PLATFORM_WINDOWS)
+        target_link_libraries(GameEngine PRIVATE opengl32)
+    endif()
 endif()
 
 target_include_directories(GameEngine PUBLIC 

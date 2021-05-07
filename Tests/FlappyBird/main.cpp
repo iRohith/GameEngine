@@ -27,19 +27,23 @@ glm::vec3 ScreenToWorld(const glm::vec<2,int>& _pos, const glm::vec<2,int>& wSiz
 int main(){
     using namespace GameEngine;
 
+    // Change next line if needed
+    SetAssetFolder(std::filesystem::current_path().parent_path().append("assets").string());
+
     AppConfig cfg;
     cfg.Name = cfg.defaultWindowConfig.Title = "Flappy Bird";
     cfg.defaultWindowConfig.Width = 1024;
     cfg.defaultWindowConfig.Height = 768;
-    cfg.frameRate = 60;
+    cfg.frameRate = 120;
     cfg.tryAccurateFrameRate = false;
-    cfg.gcConfig.doubleBuffered = false;
+    cfg.gcConfig.doubleBuffered = true;
     cfg.gcConfig.vsync = true;
     
     App& app = *App::Create(cfg);
     Window& win = *app.GetDefaultWindow();
-    auto prevWinSize = win.GetConfig().size();
     Renderer* renderer = win.GetRenderer();
+    auto prevWinSize = win.GetConfig().size();
+
     SpriteRenderer sr;
 
     Level pipes(sr);
@@ -59,15 +63,18 @@ int main(){
         sr.Update(renderer);
         app.GetGC()->SwapBuffers();
 
-        if (Input::IsKeyPressed(Events::F11)) win.ToggleFullscreen();        
+        if (Input::IsKeyPressed(Events::F11)) {
+            win.ToggleFullscreen();
+        }
         if (Input::IsKeyPressed(Events::ESC)) win.Close();
         
         auto wSize = win.GetConfig().size();
+        Log::debug(wSize);
         if (wSize != prevWinSize){
             sr.GetShader()->SetMat4("u_ViewProjection", get_view_projection((float)wSize.x / wSize.y));
             prevWinSize = wSize;
         }
-        Log::debug("FrameRate = {:.0f}, DeltaTime = {:.3}", Time::FrameRate(), Time::DeltaTime());
+        //Log::debug("FrameRate = {:.0f}, DeltaTime = {:.3}", Time::FrameRate(), Time::DeltaTime());
     }
 
     return 0;
